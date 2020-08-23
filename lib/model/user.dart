@@ -80,4 +80,8 @@ class TournamentsStats {
     data['won'] = this.won;
     return data;
   }
+
+  int getWinningPercentage() {
+    return ((won / played) * 100).toInt();
+  }
 }

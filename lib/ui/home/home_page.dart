@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bluestacks_assignment/model/tournaments.dart';
 import 'package:bluestacks_assignment/model/user.dart';
 import 'package:bluestacks_assignment/ui/home/home_bloc.dart';
@@ -15,7 +17,7 @@ class HomePageState extends State<HomePage> {
   User _user;
   List<Tournament> tournaments = [];
   bool _hasReachedMax = false;
-  final _scrollThreshold = 400;
+  final _scrollThreshold = 1000;
   String _cursor;
 
   ScrollController _scrollController = new ScrollController();
@@ -25,7 +27,7 @@ class HomePageState extends State<HomePage> {
     final currentScroll = _scrollController.position.pixels;
 
     if (maxScroll - currentScroll <= _scrollThreshold && !_hasReachedMax) {
-      _bloc.add(GetTournaments(cursor:_cursor));
+      _bloc.add(GetTournaments(cursor: _cursor));
     }
   }
 
@@ -61,16 +63,25 @@ class HomePageState extends State<HomePage> {
                 _cursor = state.cursor;
               });
             }
+            if (state is ProfileFetchedState) {
+              setState(() {
+                _user = state.user;
+              });
+            }
           },
           child: BlocBuilder<HomeBloc, HomeState>(
             builder: (BuildContext context, HomeState state) {
               if (state is HomeInitial) {
-                _bloc.add(GetTournaments(cursor: _cursor));
+                _bloc.add(GetProfile());
+                Timer(Duration(seconds: 1, milliseconds: 200), (){
+                  _bloc.add(GetTournaments(cursor: _cursor));
+
+                });
               }
               return Container(
                 child: ListView.builder(
-                  controller: _scrollController,
-                    itemCount: tournaments.length+1,
+                    controller: _scrollController,
+                    itemCount: tournaments.length + 1,
                     itemBuilder: (context, index) {
                       if (index == 0) {
                         return Column(
@@ -110,7 +121,8 @@ class HomePageState extends State<HomePage> {
                                       ),
                                       child: CachedNetworkImage(
                                         fit: BoxFit.cover,
-                                        imageUrl: tournaments[index-1].coverUrl,
+                                        imageUrl:
+                                            tournaments[index - 1].coverUrl,
                                         height: 100,
                                         alignment: Alignment.center,
                                         placeholder: (context, string) {
@@ -136,11 +148,11 @@ class HomePageState extends State<HomePage> {
                                           CrossAxisAlignment.start,
                                       children: <Widget>[
                                         Text(
-                                          tournaments[index-1].name,
+                                          tournaments[index - 1].name,
                                           maxLines: 1,
                                         ),
                                         Text(
-                                          tournaments[index-1].gameName,
+                                          tournaments[index - 1].gameName,
                                           maxLines: 1,
                                         )
                                       ],
@@ -166,6 +178,8 @@ class HomePageState extends State<HomePage> {
     return Container(
       padding: const EdgeInsets.only(top: 24, left: 16, right: 16),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -179,7 +193,8 @@ class HomePageState extends State<HomePage> {
                   borderRadius: BorderRadius.circular(40),
                   child: CachedNetworkImage(
                     fit: BoxFit.cover,
-                    imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80",
+                    imageUrl:
+                        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80",
                     height: 80,
                     width: 80,
                     alignment: Alignment.topCenter,
@@ -199,7 +214,7 @@ class HomePageState extends State<HomePage> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      'Simon Baker',
+                      _user != null ? _user.fullName : "",
                       style: TextStyle(fontSize: 24),
                     ),
                   ),
@@ -209,19 +224,21 @@ class HomePageState extends State<HomePage> {
                       height: 48,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
+                        borderRadius: BorderRadius.circular(28),
                         border: Border.all(color: Colors.blue),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.only(left: 16.0, right: 24),
                         child: Center(
                           child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               Text(
-                                '2250 ',
+                                _user != null ? _user.rating.toString() : "",
                                 style:
-                                    TextStyle(fontSize: 24, color: Colors.blue),
+                                    TextStyle(fontSize: 20, color: Colors.blue),
                               ),
+                              Text(" "),
                               Text(
                                 'Elo rating',
                               ),
@@ -246,7 +263,9 @@ class HomePageState extends State<HomePage> {
                 children: <Widget>[
                   Expanded(
                     child: getStatsWidget(
-                      '34',
+                      _user != null
+                          ? _user.tournamentsStats.played.toString()
+                          : "",
                       'Tournaments\nplayed',
                       LinearGradient(
                         begin: Alignment.centerLeft,
@@ -259,7 +278,9 @@ class HomePageState extends State<HomePage> {
                     child: Padding(
                       padding: const EdgeInsets.only(left: 1.0, right: 1),
                       child: getStatsWidget(
-                        '09',
+                        _user != null
+                            ? _user.tournamentsStats.won.toString()
+                            : "",
                         'Tournaments\nwon',
                         LinearGradient(
                           begin: Alignment.bottomCenter,
@@ -271,7 +292,12 @@ class HomePageState extends State<HomePage> {
                   ),
                   Expanded(
                     child: getStatsWidget(
-                      '16%',
+                      _user != null
+                          ? _user.tournamentsStats
+                                  .getWinningPercentage()
+                                  .toString() +
+                              "%"
+                          : "",
                       'Winning\npercentage',
                       LinearGradient(
                         begin: Alignment.centerLeft,

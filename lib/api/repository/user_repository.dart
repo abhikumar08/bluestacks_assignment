@@ -17,4 +17,8 @@ class UserRepository {
     body['password'] = password;
     return _apiClient.post(ApiClient.LOGIN, body);
   }
+  
+  Future<dynamic> getProfile(){
+    return _apiClient.get(null, completeUrl: ApiClient.PROFILE_URL);
+  }
 }

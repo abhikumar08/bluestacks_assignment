@@ -1,13 +1,20 @@
 import 'package:bluestacks_assignment/ui/home/home_page.dart';
 import 'package:bluestacks_assignment/ui/login/login_page.dart';
+import 'package:bluestacks_assignment/utils/shared_preferece_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
-void main() {
-  runApp(MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  bool isLoggedIn = await SharedPreferencesHelper().isLoggedIn();
+
+  runApp(MyApp(isLoggedIn: isLoggedIn,));
 }
 
 class MyApp extends StatelessWidget {
+  final bool isLoggedIn;
+
+  const MyApp({Key key, this.isLoggedIn}) : super(key: key);
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -40,7 +47,7 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: HomePage(),
+      home: isLoggedIn?HomePage():LogInPage(),
     );
   }
 }

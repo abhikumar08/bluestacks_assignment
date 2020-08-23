@@ -1,3 +1,4 @@
+import 'package:bluestacks_assignment/ui/home/home_page.dart';
 import 'package:bluestacks_assignment/ui/login/login_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -25,7 +26,22 @@ class LogInPageState extends State<LogInPage> {
       child: Scaffold(
         backgroundColor: Colors.black,
         body: BlocListener<LoginBloc, LoginState>(
-          listener: (BuildContext context, LoginState state) {},
+          listener: (BuildContext context, LoginState state) {
+            if (state is LoginSuccessful) {
+              setState(() {
+                innerLoading = false;
+              });
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (context) => HomePage()));
+            }
+            if (state is ErrorOccurred) {
+              setState(() {
+                innerLoading = false;
+              });
+              Scaffold.of(context)
+                  .showSnackBar(SnackBar(content: Text(state.errorMessage)));
+            }
+          },
           child: Container(
             height: double.infinity,
             padding: EdgeInsets.only(left: 20, right: 20),
@@ -58,14 +74,14 @@ class LogInPageState extends State<LogInPage> {
                           controller: _userNameController,
                           autofocus: false,
                           validator: (val) {
-                            return val.length < 1 ? "Username Required" : null;
+                            return val.length < 3 || val.length > 10
+                                ? "Invalid username!"
+                                : null;
                           },
-                          onChanged: (val){
+                          onChanged: (val) {
                             setState(() {
                               isFormValid = val.length >= 3 &&
-                                  val.length <= 10 &&
-                                  _passwordController.text.length <= 10 &&
-                                  _passwordController.text.length >= 3;
+                                  val.length <= 10;
                             });
                           },
                           keyboardType: TextInputType.text,
@@ -88,16 +104,18 @@ class LogInPageState extends State<LogInPage> {
                           cursorColor: Colors.white,
                           autofocus: false,
                           validator: (val) {
-                            return val.length < 1 ? "Password Required" : null;
+                            return val.length <= 3 || val.length > 11
+                                ? "Invalid password!"
+                                : null;
                           },
-                          onChanged: (val){
-                            setState(() {
-                              isFormValid = val.length >= 3 &&
-                                  val.length <= 10 &&
-                                  _userNameController.text.length <= 10 &&
-                                  _userNameController.text.length >= 3;
-                            });
-                          },
+//                          onChanged: (val) {
+//                            setState(() {
+//                              isFormValid = val.length >= 3 &&
+//                                  val.length <= 10 &&
+//                                  _userNameController.text.length <= 10 &&
+//                                  _userNameController.text.length >= 3;
+//                            });
+//                          },
                           obscureText: true,
                           keyboardType: TextInputType.text,
                           style: TextStyle(color: Colors.white),
@@ -133,7 +151,6 @@ class LogInPageState extends State<LogInPage> {
                                       elevation: 8,
                                       onPressed: isFormValid
                                           ? () {
-                                              print("on click");
                                               final form = formKey.currentState;
                                               if (form.validate()) {
                                                 setState(() {

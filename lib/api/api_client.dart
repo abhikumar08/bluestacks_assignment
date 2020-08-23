@@ -12,12 +12,14 @@ class ApiClient {
 
   var _client;
 
-  static const String BASE_API_URL = 'https://tournaments-dot-game-tv-prod.uc.r.appspot.com/tournament/api/';
+  static const String BASE_API_URL =
+      'https://tournaments-dot-game-tv-prod.uc.r.appspot.com/tournament/api/';
 
   static const String REFRESH_TOKEN_URL = 'refreshTokenUrl';
 
   static const String LOGIN = 'login';
   static const String TOURNAMENTS = 'tournaments_list_v2';
+  static const String PROFILE_URL = 'https://run.mocky.io/v3/104fe47e-e5ab-465c-b1f3-399af4787afe';
 
   factory ApiClient() {
     return _singleton;
@@ -120,13 +122,15 @@ class ApiClient {
   }
 
   Future<dynamic> get(String endpoint,
-      {Map<String, dynamic> queryParams, String tag}) async {
+      {Map<String, dynamic> queryParams,
+      String tag,
+      String completeUrl}) async {
     print('Api Get, url $endpoint');
     dynamic responseJson;
     try {
       var client = await getApiClient();
       final response = await client.get(
-        BASE_API_URL + endpoint,
+        completeUrl == null ? BASE_API_URL + endpoint : completeUrl,
         queryParameters: queryParams,
       );
       responseJson = _returnResponse(response);

@@ -10,7 +10,11 @@ class TournamentsFetchedState extends HomeState {
   final bool hasReachedMax;
   final String cursor;
 
-  TournamentsFetchedState( {this.tournaments, this.hasReachedMax,this.cursor,});
+  TournamentsFetchedState({
+    this.tournaments,
+    this.hasReachedMax,
+    this.cursor,
+  });
 
   @override
   String toString() =>
@@ -21,6 +25,12 @@ class TournamentsFetchedState extends HomeState {
     return TournamentsFetchedState(
         tournaments: tournaments ?? this.tournaments,
         hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-    cursor:cursor??this.cursor);
+        cursor: cursor ?? this.cursor);
   }
+}
+
+class ProfileFetchedState extends HomeState {
+  final User user;
+
+  ProfileFetchedState(this.user);
 }

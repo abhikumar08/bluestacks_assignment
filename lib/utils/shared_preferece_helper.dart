@@ -7,6 +7,7 @@ class SharedPreferencesHelper {
   static final String userNameKey = "userName";
   static final String userIdKey = "userId";
   static final String userProfileUrlKey = "userProfileUrl";
+  static final String isLoggedInKey = "";
 
   static SharedPreferences _prefs;
 
@@ -30,8 +31,16 @@ class SharedPreferencesHelper {
 
   Future<bool> isLoggedIn() async {
     _prefs = await getPreferences();
-    String accessToken = _prefs.getString(accessTokenKey);
-    return accessToken != null;
+    bool isLoggedIn = _prefs.getBool(isLoggedInKey);
+    if (isLoggedIn == null) {
+      return false;
+    }
+    return isLoggedIn;
+  }
+
+  Future setIsLoggedIn(bool isLoggedIn) async {
+    _prefs = await getPreferences();
+    _prefs.setBool(isLoggedInKey, isLoggedIn);
   }
 
   Future setAuthResponse(AuthResponse authResponse) async {

@@ -5,6 +5,7 @@ import 'package:bluestacks_assignment/model/user.dart';
 import 'package:bluestacks_assignment/ui/home/home_bloc.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class HomePage extends StatefulWidget {
@@ -49,7 +50,8 @@ class HomePageState extends State<HomePage> {
           backgroundColor: Colors.white,
           elevation: 0,
           centerTitle: true,
-          title: Text('FlyingWolf',
+          leading: Icon(Icons.menu, color: Colors.grey,),
+          title: Text(_user!=null?_user.userName:"",
               style: TextStyle(
                 color: Colors.black,
               )),
@@ -73,15 +75,16 @@ class HomePageState extends State<HomePage> {
             builder: (BuildContext context, HomeState state) {
               if (state is HomeInitial) {
                 _bloc.add(GetProfile());
-                Timer(Duration(seconds: 1, milliseconds: 200), (){
+                Timer(Duration(seconds: 1, milliseconds: 500), () {
                   _bloc.add(GetTournaments(cursor: _cursor));
-
                 });
               }
               return Container(
                 child: ListView.builder(
                     controller: _scrollController,
-                    itemCount: tournaments.length + 1,
+                    itemCount: _hasReachedMax
+                        ? tournaments.length + 1
+                        : tournaments.length + 2,
                     itemBuilder: (context, index) {
                       if (index == 0) {
                         return Column(
@@ -99,6 +102,8 @@ class HomePageState extends State<HomePage> {
                             ),
                           ],
                         );
+                      } else if (index == tournaments.length + 1) {
+                        return BottomLoader();
                       }
                       return Card(
                         shape: RoundedRectangleBorder(
@@ -124,12 +129,7 @@ class HomePageState extends State<HomePage> {
                                         imageUrl:
                                             tournaments[index - 1].coverUrl,
                                         height: 100,
-                                        alignment: Alignment.center,
-                                        placeholder: (context, string) {
-                                          return Container(
-                                            color: Colors.red,
-                                          );
-                                        },
+                                        alignment: Alignment.topCenter,
                                       ),
                                     ),
                                   ),
@@ -147,18 +147,30 @@ class HomePageState extends State<HomePage> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: <Widget>[
-                                        Text(
-                                          tournaments[index - 1].name,
-                                          maxLines: 1,
+                                        Padding(
+                                          padding: const EdgeInsets.only(right:48),
+                                          child: Text(
+                                            tournaments[index - 1].name,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold
+                                            ),
+                                          ),
                                         ),
-                                        Text(
-                                          tournaments[index - 1].gameName,
-                                          maxLines: 1,
+                                        Padding(
+                                          padding: const EdgeInsets.only(top:8.0),
+                                          child: Text(
+                                            tournaments[index - 1].gameName,
+                                            maxLines: 1,
+
+                                          ),
                                         )
                                       ],
                                     ),
                                   ),
-                                  Text(">")
+                                  Icon(Icons.keyboard_arrow_right)
                                 ],
                               ),
                             )
@@ -336,6 +348,24 @@ class HomePageState extends State<HomePage> {
             textAlign: TextAlign.center,
           )
         ],
+      ),
+    );
+  }
+}
+
+class BottomLoader extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      child: Center(
+        child: SizedBox(
+          width: 33,
+          height: 33,
+          child: CircularProgressIndicator(
+            strokeWidth: 1.5,
+          ),
+        ),
       ),
     );
   }
